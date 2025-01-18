@@ -9,9 +9,67 @@
 	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
 	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
-	<mvc:annotation-driven />
+	<aop:aspectj-autoproxy />
 
+	<!-- Validator, ConversionService, MessageConverter를 자동으로 등록 -->
+	<mvc:annotation-driven>
+		<!-- Message Converter -->
+		<mvc:message-converters>
+			<bean
+				class="org.springframework.http.converter.StringHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>text/html; charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+			<bean
+				class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>application/json; charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+		</mvc:message-converters>
+
+		<!-- Argument Resolvers -->
+		<mvc:argument-resolvers>
+			<bean
+				class="jblog.security.AuthUserHandlerMethodArgumentResolver" />
+		</mvc:argument-resolvers>
+	</mvc:annotation-driven>
+
+	<!-- DefaultServlet Handler -->
 	<mvc:default-servlet-handler />
+
+	<!-- mvc url-resource mapping -->
+	<mvc:resources
+		location="file:/Users/changnos/jblog-files/"
+		mapping="/assets/upload-images/**" />
+
+	<!-- Multipart Resolver -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.support.StandardServletMultipartResolver" />
+
+	<!-- Interceptors -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/user/auth" />
+			<bean class="jblog.security.LoginInterceptor" />
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/user/logout" />
+			<bean class="jblog.security.LogoutInterceptor" />
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<mvc:mapping path="/user/auth" />
+			<mvc:mapping path="/user/logout" />
+			<mvc:mapping path="/assets/**" />
+			<bean class="jblog.security.AuthInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
 
 	<!-- View Resolver -->
 	<bean id="viewResolver"
@@ -23,13 +81,10 @@
 		<property name="exposeContextBeansAsAttributes" value="true" />
 		<property name="exposedContextBeanNames">
 			<list>
-				<value>site</value>
+				<value>blog</value>
 			</list>
 		</property>
 	</bean>
-
-	<!-- ApplicationContextEventListener -->
-	<bean class="mysite.event.ApplicationContextEventListener" />
 
 	<context:annotation-config />
 	<context:component-scan

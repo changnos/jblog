@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="post">
+
+	<select id="findByCategoryId" parameterType="long"
+		resultType="postvo">
+		<![CDATA[
+			select id, title, contents, date_format(reg_date, '%Y/%m/%d') as regDate, category_id as categoryId 
+			from post
+			where category_id=#{categoryId}
+			order by reg_date desc
+		]]>
+	</select>
+
+	<select id="checkByCategoryId" parameterType="long"
+		resultType="int">
+		<![CDATA[
+			select count(*) 
+			from post
+			where category_id=#{categoryId}
+		]]>
+	</select>
+
+	<select id="deleteByCategoryId" parameterType="long"
+		resultType="postvo">
+		<![CDATA[
+			delete from post
+			where category_id=#{categoryId}
+		]]>
+	</select>
+
+	<insert id="insert" parameterType="postvo">
+		<![CDATA[
+			insert into post
+			values(null, #{title}, #{contents}, now(), #{categoryId})
+		]]>
+	</insert>
+</mapper>
